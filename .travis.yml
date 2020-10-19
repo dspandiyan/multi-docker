@@ -1,0 +1,18 @@
+sudo: required
+services:
+    - docker
+before_install:
+    - docker build -t dspandiyan/react-test -f ./client/Dockerfile.dev ./client
+scripts:
+    - docker run dspandiyan/react-test npm test -- --watchAll=false
+after_success:
+    - docker build -t dspandiyan/multi-client ./client
+    - docker build -t dspandiyan/multi-nginx ./nginx
+    - docker build -t dspandiyan/multi-server ./server
+    - docker build -t dspandiyan/multi-worker ./worker
+    - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+    - docker push dspandiyan/multi-client
+    - docker push dspandiyan/multi-nginx
+    - docker push dspandiyan/multi-server
+    - docker push dspandiyan/multi-worker
+
